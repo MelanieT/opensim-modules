@@ -44,7 +44,7 @@ using Microsoft.Scripting.Hosting;
 using IronPython.Hosting;
 using IronPython.Runtime;
 
-[assembly: Addin("XPython/Module", "1.0")]
+[assembly: Addin("XPython.Module", "1.0")]
 [assembly: AddinDependency("OpenSim", "0.5")]
 
 namespace XPython
