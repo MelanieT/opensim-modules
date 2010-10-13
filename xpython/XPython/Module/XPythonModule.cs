@@ -64,6 +64,7 @@ namespace XPython
 		
         private ScriptEngine m_pyengine = null;
         private ScriptScope m_pyscope = null;
+        protected bool m_Enabled = true;
 
         public event AddRegionEvent OnAddRegion;
         public event RegionLoadedEvent OnRegionLoaded;
@@ -94,13 +95,24 @@ namespace XPython
                     "  import traceback\n" +
                     "  traceback.print_exc()\n",
                      SourceCodeKind.Statements);
-            source.Execute(m_pyscope);
+            try
+            {
+                source.Execute(m_pyscope);
+            }
+            catch (Exception e)
+            {
+                m_log.Error("[XPYTHON]: Exception processing python code: " +
+                        e.ToString());
+                m_Enabled = false;
+            }
         }
 
         public void AddRegion(Scene scene)
         {
             m_Scene = scene;
 
+            if (!m_Enabled)
+                return;
             AddRegionEvent e = OnAddRegion;
             if (e != null)
                 e(scene);
@@ -108,8 +120,8 @@ namespace XPython
 
         public void RegionLoaded(Scene scene)
         {
-            m_Scene = scene;
-
+            if (!m_Enabled)
+                return;
             RegionLoadedEvent e = OnRegionLoaded;
             if (e != null)
                 e(scene);
@@ -117,8 +129,8 @@ namespace XPython
 
         public void RemoveRegion(Scene scene)
         {
-            m_Scene = scene;
-
+            if (!m_Enabled)
+                return;
             RemoveRegionEvent e = OnRemoveRegion;
             if (e != null)
                 e(scene);
