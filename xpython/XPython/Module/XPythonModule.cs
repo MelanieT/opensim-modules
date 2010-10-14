@@ -79,6 +79,13 @@ namespace XPython
             m_pyengine = Python.CreateEngine();
             m_pyscope = m_pyengine.CreateScope();
             ICollection<string> paths = m_pyengine.GetSearchPaths();
+            IConfig pyConfig = config.Configs["Python"];
+            if (pyConfig != null)
+            {
+                string libPath = pyConfig.GetString("LibPath", String.Empty);
+                if (libPath != String.Empty)
+                    paths.Add(libPath);
+            }
             paths.Add(AppDomain.CurrentDomain.BaseDirectory);
 			m_pyengine.SetSearchPaths(paths);
 			m_log.Info("Added " + AppDomain.CurrentDomain.BaseDirectory +
