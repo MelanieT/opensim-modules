@@ -51,7 +51,6 @@ namespace XPython
 {
     public delegate void AddRegionEvent(Scene scene);
     public delegate void RegionLoadedEvent(Scene scene);
-    public delegate void RemoveRegionEvent(Scene scene);
 
     [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule", Id = "XPython")]
     public class XPythonModule : INonSharedRegionModule
@@ -68,7 +67,6 @@ namespace XPython
 
         public event AddRegionEvent OnAddRegion;
         public event RegionLoadedEvent OnRegionLoaded;
-        public event RemoveRegionEvent OnRemoveRegion;
 		
         #region IRegionModule interface
 
@@ -143,11 +141,6 @@ namespace XPython
 
         public void RemoveRegion(Scene scene)
         {
-            if (!m_Enabled)
-                return;
-            RemoveRegionEvent e = OnRemoveRegion;
-            if (e != null)
-                e(scene);
         }
 
 		public void Close()
