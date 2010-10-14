@@ -64,7 +64,7 @@ namespace XPython
 		
         private ScriptEngine m_pyengine = null;
         private ScriptScope m_pyscope = null;
-        protected bool m_Enabled = true;
+        protected bool m_Enabled = false;
 
         public event AddRegionEvent OnAddRegion;
         public event RegionLoadedEvent OnRegionLoaded;
@@ -74,18 +74,25 @@ namespace XPython
 
         public void Initialise(IConfigSource config)
         {
+            IConfig pyConfig = config.Configs["Python"];
+            if (pyConfig == null)
+                return;
+
+            if (pyConfig.GetBoolean("Enabled", false) != true)
+                return;
+
+            m_Enabled = true;
+
             m_log.Info("[PythonModuleLoader] Initializing...");
 			m_Config = config;
             m_pyengine = Python.CreateEngine();
             m_pyscope = m_pyengine.CreateScope();
             ICollection<string> paths = m_pyengine.GetSearchPaths();
-            IConfig pyConfig = config.Configs["Python"];
-            if (pyConfig != null)
-            {
-                string libPath = pyConfig.GetString("LibPath", String.Empty);
-                if (libPath != String.Empty)
-                    paths.Add(libPath);
-            }
+
+            string libPath = pyConfig.GetString("LibPath", String.Empty);
+            if (libPath != String.Empty)
+                paths.Add(libPath);
+
             paths.Add(AppDomain.CurrentDomain.BaseDirectory);
 			m_pyengine.SetSearchPaths(paths);
 			m_log.Info("Added " + AppDomain.CurrentDomain.BaseDirectory +
