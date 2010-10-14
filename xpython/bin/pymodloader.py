@@ -44,26 +44,29 @@ LOADMODS = ["samplemodule"]
 from OpenSim.Region.Framework.Interfaces import INonSharedRegionModule
 
 class PyReloader:
+    upgradable = False
     reginstances = []
 
     def Initialise(self, xpymod, configsource):
         self.config = configsource
         log.Info('[PYMODLOADER] initialised')
         xpymod.OnAddRegion += self.handleaddregion
-        self.scene = None
+        xpymod.OnRegionLoaded += self.handleregionloaded
         self.xpymod = xpymod
-        self.reload()
+        self.load()
 
     def handleaddregion(self, scene):
         log.Info("handleaddregion called")
-        self.scene = scene
         scene.AddCommand(self.xpymod, "py-reload", "py-reload", "...", self.cmd_py_reload)
+        self.scene = scene
         for rm in self.reginstances:
             log.Info("adding scene %s to region module %s" % (scene, rm))
+            scene.AddRegionModule(rm.Name, rm)
             rm.AddRegion(scene)
 
-    def Close(self):
-        log.Info('close')
+    def handleregionloaded(self, scene):
+        for rm in self.reginstances:
+            rm.RegionLoaded(scene)
 
     def cmd_py_reload(self, modname, args):
         try:
@@ -74,17 +77,45 @@ class PyReloader:
             traceback.print_exc()
             raise
 
+    def load(self):
+        print 'loading modules & looking for region classes'
+        regclasses = []
+        for mname in LOADMODS:
+            osutil.load_or_reload(mname)
+            m = sys.modules[mname]
+            for name in dir(m):
+                o = getattr(m, name)
+                if name.startswith('_'):
+                    continue
+                try:
+                    x = issubclass(o, INonSharedRegionModule)
+                except TypeError:
+                    pass
+                else:
+                    if x and getattr(o, 'autoload', None):
+                        print 'found', name
+                        regclasses.append(o)
+
+        print 'instantiating found python modules'
+        for klass in regclasses:
+            ri = klass()
+            ri.Initialise(self.config)
+            print "register instance", ri
+            self.reginstances.append(ri)
+        print 'load done'
+
     def reload(self):
         log.Info("closing modules")
         for ri in self.reginstances:
             log.Debug("doing " + str(ri) + " from list of RM instances")
-            if ri.scene and ri.Name in ri.scene.Modules:
+            if ri.Name in self.scene.RegionModules:
                 print "also found in modules, so marking removed"
                 ri.removed = True
                 print "removing", ri.Name, "from self.scene.Modules"
-                ri.scene.Modules.Remove(ri.Name)
+                self.scene.RemoveRegionModule(ri.Name)
             else:
                 print "not found in modules so not removing"
+            ri.RemoveRegion(self.scene)
             ri.Close()
 
         self.reginstances[:] = []
@@ -113,9 +144,9 @@ class PyReloader:
             ri.Initialise(self.config)
             print "register instance", ri
             self.reginstances.append(ri)
-            if self.scene:
-                self.scene.AddRegionModule(ri.Name, ri)
-                ri.AddRegion(self.scene)
+            self.scene.AddRegionModule(ri.Name, ri)
+            ri.AddRegion(self.scene)
+            ri.RegionLoaded(self.scene)
         print 'reload done'
 
 loader = None
