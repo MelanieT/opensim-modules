@@ -48,15 +48,20 @@ class PyReloader(INonSharedRegionModule):
     upgradable = False
     reginstances = []
 
-    def Initialise(self, scene, configsource):
-        self.scene = scene
+    def Initialise(self, xpymod, configsource):
         self.config = configsource
-        scene.AddCommand(self, "py-reload", "py-reload", "...", self.cmd_py_reload)
-        log.Info('initialised with' + str(scene))
+        log.Info('[PYMODLOADER] initialised')
+        xpymod.OnAddRegion += self.handleaddregion
+        self.xpymod = xpymod
+        self.reload()
 
-    def PostInitialise(self):
-        log.Info('post-initialise')
-    
+    def handleaddregion(self, scene):
+        log.Info("handleaddregion called")
+        scene.AddCommand(self, "py-reload", "py-reload", "...", self.cmd_py_reload)
+        for rm in self.reginstances:
+            log.Info("adding scene %s to region module %s" % (scene, rm))
+            rm.AddRegion(scene)
+
     def Close(self):
         log.Info('close')
 
@@ -72,14 +77,14 @@ class PyReloader(INonSharedRegionModule):
 
     def cmd_py_reload(self, modname, args):
         try:
-            self.reload(modname, args)
+            self.reload()
         except Exception, e:
             log.Error("Python exception on reload")
             import traceback
             traceback.print_exc()
             raise
 
-    def reload(self, modname, args):
+    def reload(self):
         log.Info("closing modules")
         for ri in self.reginstances:
             log.Debug("doing " + str(ri) + " from list of RM instances")
@@ -115,7 +120,7 @@ class PyReloader(INonSharedRegionModule):
         print 'instantiating found python modules'
         for klass in regclasses:
             ri = klass()
-            ri.Initialise(self.scene, self.config)
+            ri.Initialise(self.config)
             #self.scene.AddModule(ri.Name, ri)
             print "register instance", ri
             self.reginstances.append(ri)
@@ -124,9 +129,10 @@ class PyReloader(INonSharedRegionModule):
 
 loader = None
 
-def sceneinit(scene, config):
+def init(xpymod, config):
+    log.Info("[PYMODLOADER] init called")
     global loader
     loader = PyReloader()
-    loader.Initialise(scene, config)
+    loader.Initialise(xpymod, config)
     loader.PostInitialise()
-    loader.cmd_py_reload('', [])
+    log.Info("[PYMODLOADER] init finished")

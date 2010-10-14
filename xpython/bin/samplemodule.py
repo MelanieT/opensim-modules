@@ -6,12 +6,19 @@ print "samplemodule loading"
 class HelloWorldModule(INonSharedRegionModule):
     autoload = True
 
-    def Initialise(self, scene, configsource):
-        self.scene = scene
+    def Initialise(self, configsource):
         osutil.log.Info("[SAMPLEMODULE] Initialise")
 
-    def PostInitialise(self):
-        self.scene.EventManager.OnNewClient += self.newclient_callback
+    def AddRegion(self, scene):
+        osutil.log.Info("[SAMPLEMODULE] AddRegion called")
+        try:
+            #INonSharedRegionModule.AddRegion(self, scene)
+            self.scene = scene
+            osutil.log.Info("[SAMPLEMODULE] hooking OnNewClient")
+            scene.EventManager.OnNewClient += self.newclient_callback
+        except:
+            import traceback
+            traceback.print_exc()
 
     def getname(self):
         return self.__class__.__name__
