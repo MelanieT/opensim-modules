@@ -23,33 +23,42 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import sys
+sys.path.append('/usr/lib/python2.6')
+
 import clr
 clr.AddReference('OpenSim.Framework')
 clr.AddReference('OpenSim.Region.Framework')
 
-import sys
-sys.path.append('/usr/lib/python2.6/') #'ScriptEngines/Lib') # stdlib seems to live here
+import osutil
+from osutil import log
 
-from OpenSim.Region.Framework.Interfaces import IRegionModule
-#import textcreate, pictureframe, toggleboxcolor, oukautil
-import webframeserver
+# LOADMODS = []
+# for modname, classname, cfg in osutil.read_ini("pymodules.ini"):
+#     m = osutil.load_or_reload(modname)
+#     if m is not None: #loaded succesfully. if not, freshload logged traceback
+#         c = getattr(m, classname)
+#         LOADMODS.append((c, cfg))
 
-class PyReloader(IRegionModule):
+LOADMODS = ["samplemodule"]
+
+from OpenSim.Region.Framework.Interfaces import INonSharedRegionModule
+
+class PyReloader(INonSharedRegionModule):
     upgradable = False
-    regpymods = [webframeserver] #textcreate, pictureframe, toggleboxcolor, oukautil]
     reginstances = []
 
     def Initialise(self, scene, configsource):
         self.scene = scene
         self.config = configsource
         scene.AddCommand(self, "py-reload", "py-reload", "...", self.cmd_py_reload)
-        print self, 'initialised with', scene
+        log.Info('initialised with' + str(scene))
 
     def PostInitialise(self):
-        print self, 'post-initialise'
+        log.Info('post-initialise')
     
     def Close(self):
-        print self, 'close'
+        log.Info('close')
 
     def getname(self):
         return "MyRegionModule"
@@ -65,15 +74,15 @@ class PyReloader(IRegionModule):
         try:
             self.reload(modname, args)
         except Exception, e:
-            print 'err or'
+            log.Error("Python exception on reload")
             import traceback
             traceback.print_exc()
             raise
 
     def reload(self, modname, args):
-        print 'closing modules'
+        log.Info("closing modules")
         for ri in self.reginstances:
-            print "found", ri, "in reginstances"
+            log.Debug("doing " + str(ri) + " from list of RM instances")
             if ri.Name in self.scene.Modules:
                 print "also found in modules, so marking removed"
                 ri.removed = True
@@ -87,14 +96,15 @@ class PyReloader(IRegionModule):
 
         print 'reloading modules & looking for region classes'
         regclasses = []
-        for m in self.regpymods:
-            reload(m)
+        for mname in LOADMODS:
+            osutil.load_or_reload(mname)
+            m = sys.modules[mname]
             for name in dir(m):
                 o = getattr(m, name)
                 if name.startswith('_'):
                     continue
                 try:
-                    x = issubclass(o, IRegionModule)
+                    x = issubclass(o, INonSharedRegionModule)
                 except TypeError:
                     pass
                 else:
@@ -102,11 +112,11 @@ class PyReloader(IRegionModule):
                         print 'found', name
                         regclasses.append(o)
 
-        print 'instantiating found regions'
+        print 'instantiating found python modules'
         for klass in regclasses:
             ri = klass()
             ri.Initialise(self.scene, self.config)
-            self.scene.AddModule(ri.Name, ri)
+            #self.scene.AddModule(ri.Name, ri)
             print "register instance", ri
             self.reginstances.append(ri)
             ri.PostInitialise()
