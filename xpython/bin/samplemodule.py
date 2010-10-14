@@ -25,24 +25,6 @@ class HelloWorldModule(INonSharedRegionModule):
 
     Name = property(getname)
 
-    def callbackwrap(self, fun, suppress=False):
-        "makes sure callbacks aren't called for removed modules, and prints tracebacks on failures"
-        if self.removed:
-            return
-
-        def wrapped(*args, **kw):
-            if self.removed:
-                return
-            try:
-                return apply(fun, args, kw)
-            except:
-                import traceback
-                traceback.print_exc()
-                if not suppress:
-                    raise
-
-        return wrapped
-
     def Close(self):
         osutil.log.Info("[SAMPLEMODULE] Closing")
 
