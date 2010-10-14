@@ -44,14 +44,14 @@ LOADMODS = ["samplemodule"]
 from OpenSim.Region.Framework.Interfaces import INonSharedRegionModule
 
 class PyReloader:
-    upgradable = False
     reginstances = []
 
-    def Initialise(self, xpymod, configsource):
+    def __init__(self, xpymod, configsource):
         self.config = configsource
         log.Info('[PYMODLOADER] initialised')
         xpymod.OnAddRegion += self.handleaddregion
         xpymod.OnRegionLoaded += self.handleregionloaded
+        self.scene = None
         self.xpymod = xpymod
         self.load()
 
@@ -154,6 +154,5 @@ loader = None
 def init(xpymod, config):
     log.Info("[PYMODLOADER] init called")
     global loader
-    loader = PyReloader()
-    loader.Initialise(xpymod, config)
+    loader = PyReloader(xpymod, config)
     log.Info("[PYMODLOADER] init finished")
