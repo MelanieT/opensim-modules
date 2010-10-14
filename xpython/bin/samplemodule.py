@@ -1,21 +1,21 @@
 import osutil
 from OpenSim.Region.Framework.Interfaces import INonSharedRegionModule
 
-print "samplemodule loading"
-
 class HelloWorldModule(INonSharedRegionModule):
     autoload = True
 
     def Initialise(self, configsource):
         osutil.log.Info("[SAMPLEMODULE] Initialise")
-
+        self.scene = None
+        
     def AddRegion(self, scene):
         osutil.log.Info("[SAMPLEMODULE] AddRegion called")
         try:
             #INonSharedRegionModule.AddRegion(self, scene)
             self.scene = scene
             osutil.log.Info("[SAMPLEMODULE] hooking OnNewClient")
-            scene.EventManager.OnNewClient += self.newclient_callback
+            scene.EventManager.OnChatFromClient += self.chat_callback
+            
         except:
             import traceback
             traceback.print_exc()
@@ -26,8 +26,10 @@ class HelloWorldModule(INonSharedRegionModule):
     Name = property(getname)
 
     def Close(self):
+        if self.scene:
+            self.scene.EventManager.OnChatFromClient -= self.chat_callback
         osutil.log.Info("[SAMPLEMODULE] Closing")
 
-    def newclient_callback(self, clientview):
-        osutil.log.Info("[SAMPLEMODULE] new client: " + str(clientview.AgentId))
-
+    def chat_callback(self, clientview, chatmsg):
+        # chatmsg will be a Framework.OSChatMessage
+        osutil.log.Info("[SAMPLEMODULE] chat from " + str(clientview.AgentId) + ": " + chatmsg.Message)
