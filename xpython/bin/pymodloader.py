@@ -24,7 +24,6 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-sys.path.append('/usr/lib/python2.6')
 
 import clr
 clr.AddReference('OpenSim.Framework')
@@ -124,7 +123,6 @@ class PyReloader(INonSharedRegionModule):
             #self.scene.AddModule(ri.Name, ri)
             print "register instance", ri
             self.reginstances.append(ri)
-            ri.PostInitialise()
         print 'reload done'
 
 loader = None
@@ -134,5 +132,4 @@ def init(xpymod, config):
     global loader
     loader = PyReloader()
     loader.Initialise(xpymod, config)
-    loader.PostInitialise()
     log.Info("[PYMODLOADER] init finished")
