@@ -43,36 +43,27 @@ LOADMODS = ["samplemodule"]
 
 from OpenSim.Region.Framework.Interfaces import INonSharedRegionModule
 
-class PyReloader(INonSharedRegionModule):
-    upgradable = False
+class PyReloader:
     reginstances = []
 
     def Initialise(self, xpymod, configsource):
         self.config = configsource
         log.Info('[PYMODLOADER] initialised')
         xpymod.OnAddRegion += self.handleaddregion
+        self.scene = None
         self.xpymod = xpymod
         self.reload()
 
     def handleaddregion(self, scene):
         log.Info("handleaddregion called")
-        scene.AddCommand(self, "py-reload", "py-reload", "...", self.cmd_py_reload)
+        self.scene = scene
+        scene.AddCommand(self.xpymod, "py-reload", "py-reload", "...", self.cmd_py_reload)
         for rm in self.reginstances:
             log.Info("adding scene %s to region module %s" % (scene, rm))
             rm.AddRegion(scene)
 
     def Close(self):
         log.Info('close')
-
-    def getname(self):
-        return "MyRegionModule"
-
-    Name = property(getname)
-
-    def isshared(self):
-        return False
-
-    IsSharedModule = property(isshared)
 
     def cmd_py_reload(self, modname, args):
         try:
@@ -87,11 +78,11 @@ class PyReloader(INonSharedRegionModule):
         log.Info("closing modules")
         for ri in self.reginstances:
             log.Debug("doing " + str(ri) + " from list of RM instances")
-            if ri.Name in self.scene.Modules:
+            if ri.scene and ri.Name in ri.scene.Modules:
                 print "also found in modules, so marking removed"
                 ri.removed = True
                 print "removing", ri.Name, "from self.scene.Modules"
-                self.scene.Modules.Remove(ri.Name)
+                ri.scene.Modules.Remove(ri.Name)
             else:
                 print "not found in modules so not removing"
             ri.Close()
@@ -120,9 +111,11 @@ class PyReloader(INonSharedRegionModule):
         for klass in regclasses:
             ri = klass()
             ri.Initialise(self.config)
-            #self.scene.AddModule(ri.Name, ri)
             print "register instance", ri
             self.reginstances.append(ri)
+            if self.scene:
+                self.scene.AddRegionModule(ri.Name, ri)
+                ri.AddRegion(self.scene)
         print 'reload done'
 
 loader = None
