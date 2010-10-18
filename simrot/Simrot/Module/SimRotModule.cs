@@ -135,7 +135,7 @@ namespace Simrot
                 if (g.IsAttachment)
                     return;
 
-                g.RootPart.UpdateRotation(g.GroupRotation * q);
+                g.RootPart.UpdateRotation(q * g.GroupRotation);
                 Vector3 v = g.AbsolutePosition - vc;
                 g.AbsolutePosition = vc + v * q;
             });
