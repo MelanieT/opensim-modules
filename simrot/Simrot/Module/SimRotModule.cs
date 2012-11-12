@@ -60,7 +60,7 @@ namespace Simrot
         Scene m_Scene;
 		IConfigSource m_Config;
 		
-        #region IRegionModule interface
+        #region Region Module interface
 
         public void Initialise(IConfigSource config)
         {

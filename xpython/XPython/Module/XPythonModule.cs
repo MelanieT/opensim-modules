@@ -68,7 +68,7 @@ namespace XPython
         public event AddRegionEvent OnAddRegion;
         public event RegionLoadedEvent OnRegionLoaded;
 		
-        #region IRegionModule interface
+        #region Region Module interface
 
         public void Initialise(IConfigSource config)
         {
