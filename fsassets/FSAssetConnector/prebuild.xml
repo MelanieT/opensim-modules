@@ -1,4 +1,4 @@
-   <Project name="FSAssetConnector" path="addon-modules/FSAssetConnector/Module" type="Library">
+   <Project frameworkVersion="v4_0" name="FSAssetConnector" path="addon-modules/FSAssetConnector/Module" type="Library">
      <Configuration name="Debug">
        <Options>
          <OutputPath>../../../bin/</OutputPath>
@@ -15,7 +15,6 @@
      <Reference name="System.Data"/>
      <Reference name="System.Core"/>
      <Reference name="OpenMetaverseTypes"/>
-     <Reference name="hdfsdll"/>
      <Reference name="OpenMetaverse"/>
      <Reference name="OpenSim.Framework"/>
      <Reference name="OpenSim.Framework.Console"/>

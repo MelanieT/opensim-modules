@@ -38,7 +38,6 @@ using OpenSim.Services.Interfaces;
 using Nini.Config;
 using log4net;
 using MySql.Data.MySqlClient;
-using System.Data;
 using OpenMetaverse;
 
 namespace Careminster
