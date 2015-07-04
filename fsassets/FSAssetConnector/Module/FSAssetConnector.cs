@@ -42,7 +42,6 @@ using Nini.Config;
 using log4net;
 using MySql.Data.MySqlClient;
 using System.Data;
-using Careminster;
 using OpenMetaverse;
 using System.Security.Cryptography;
 
