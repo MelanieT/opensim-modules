@@ -1,4 +1,4 @@
-   <Project frameworkVersion="v3_5" name="Simrot.Module" path="addon-modules/Simrot/Module" type="Library">
+   <Project frameworkVersion="v4_0" name="Simrot.Module" path="addon-modules/Simrot/Module" type="Library">
      <Configuration name="Debug">
        <Options>
          <OutputPath>../../../bin/</OutputPath>

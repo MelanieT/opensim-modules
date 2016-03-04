@@ -1,4 +1,4 @@
-   <Project name="XPython.Module" path="addon-modules/XPython/Module" type="Library">
+   <Project frameworkVersion="v4_0" name="XPython.Module" path="addon-modules/XPython/Module" type="Library">
      <Configuration name="Debug">
        <Options>
          <OutputPath>../../../bin/</OutputPath>
