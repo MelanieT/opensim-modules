@@ -40,8 +40,10 @@ using OpenSim.Framework.Console;
 using OpenSim.Region.Framework.Interfaces;
 using OpenSim.Region.Framework.Scenes;
 
-[assembly: Addin("Simrot.Module", "1.0")]
-[assembly: AddinDependency("OpenSim", "0.5")]
+[assembly: Addin("Simrot.Module", OpenSim.VersionInfo.VersionNumber + "0.1")]
+[assembly: AddinDependency("OpenSim.Region.Framework", OpenSim.VersionInfo.VersionNumber)]
+[assembly: AddinDescription("Rotate sims incl. terrain.")]
+[assembly: AddinAuthor("Melanie Thielker")]
 
 namespace Simrot
 {

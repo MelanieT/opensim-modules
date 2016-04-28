@@ -44,8 +44,9 @@ using Microsoft.Scripting.Hosting;
 using IronPython.Hosting;
 using IronPython.Runtime;
 
-[assembly: Addin("XPython.Module", "1.0")]
-[assembly: AddinDependency("OpenSim", "0.5")]
+[assembly: Addin("XPython.Module", OpenSim.VersionInfo.VersionNumber + "0.1")]
+[assembly: AddinDependency("OpenSim.Region.Framework", OpenSim.VersionInfo.VersionNumber)]
+[assembly: AddinDescription("Framework to write region modules in Python.")]
 
 namespace XPython
 {
